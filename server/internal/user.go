@@ -94,7 +94,7 @@ func (user *User) PrivateChat(msg string) {
 func (user *User) GetOnlineUsers() {
 	user.Server.mapLock.Lock()
 	for _, client := range user.Server.OnlineMap {
-		client.MsgChan <- "[" + client.Addr + "] " + client.Name + ":online...\n"
+		user.MsgChan <- "[" + client.Addr + "] " + client.Name + ":online..."
 	}
 	user.Server.mapLock.Unlock()
 }

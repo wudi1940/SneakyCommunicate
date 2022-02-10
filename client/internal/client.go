@@ -38,21 +38,22 @@ func NewClient(serverIp string, port int) *Client {
 func (client *Client) Run() {
 	for client.flag != 0 {
 		for client.menu() != true {
+			fmt.Println("请输入对应的数字指令（0～4）")
 		}
 		// 根据不同模式处理不同的业务
 		switch client.flag {
 		case 1:
 			// 群聊模式
 			client.PublicChat()
-			break
 		case 2:
 			// 私聊模式
 			client.PrivateChat()
-			break
 		case 3:
 			// 更新用户名
 			client.UpdateName()
-			break
+		case 4:
+			// 获取当前在线用户列表
+			client.ShowOnlineUsers()
 		}
 	}
 }
@@ -63,7 +64,7 @@ func (client *Client) menu() bool {
 	fmt.Println("1.公聊")
 	fmt.Println("2.私聊")
 	fmt.Println("3.修改用户名")
-	//fmt.Println("4.查看在线用户列表")
+	fmt.Println("4.查看在线用户列表")
 	fmt.Println("0.退出")
 
 	fmt.Scanln(&flag)
@@ -74,7 +75,7 @@ func (client *Client) menu() bool {
 }
 
 func validate(flag int32) bool {
-	if flag >= 0 && flag <= 3 {
+	if flag >= 0 && flag <= 4 {
 		return true
 	} else {
 		return false
