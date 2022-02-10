@@ -1,6 +1,7 @@
 package client
 
 import (
+	"client/conf"
 	"fmt"
 	"io"
 	"net"
@@ -11,7 +12,7 @@ type Client struct {
 	ServerIp   string
 	ServerPort int
 	UserName   string
-	flag       int32
+	flag       int
 	Conn       net.Conn
 }
 
@@ -36,22 +37,22 @@ func NewClient(serverIp string, port int) *Client {
 
 // Run 客户端运行逻辑
 func (client *Client) Run() {
-	for client.flag != 0 {
+	for client.flag != conf.Exit {
 		for client.menu() != true {
 			fmt.Println("请输入对应的数字指令（0～4）")
 		}
 		// 根据不同模式处理不同的业务
 		switch client.flag {
-		case 1:
+		case conf.PublicChat:
 			// 群聊模式
 			client.PublicChat()
-		case 2:
+		case conf.PrivateChat:
 			// 私聊模式
 			client.PrivateChat()
-		case 3:
+		case conf.UpdateName:
 			// 更新用户名
 			client.UpdateName()
-		case 4:
+		case conf.ShowOnlineUser:
 			// 获取当前在线用户列表
 			client.ShowOnlineUsers()
 		}
@@ -59,7 +60,7 @@ func (client *Client) Run() {
 }
 
 func (client *Client) menu() bool {
-	var flag int32
+	var flag int
 
 	fmt.Println("1.公聊")
 	fmt.Println("2.私聊")
@@ -74,7 +75,7 @@ func (client *Client) menu() bool {
 	return validate(flag)
 }
 
-func validate(flag int32) bool {
+func validate(flag int) bool {
 	if flag >= 0 && flag <= 4 {
 		return true
 	} else {
@@ -122,7 +123,7 @@ func (client *Client) PrivateChat() {
 		for chatMsg != "exit" {
 			// 消息不为空发送
 			if len(remoteName) != 0 {
-				sendMsg := "to|" + remoteName + "|" + chatMsg + "\n\n"
+				sendMsg := "TO|" + remoteName + "|" + chatMsg + "\n\n"
 				_, err := client.Conn.Write([]byte(sendMsg))
 				if err != nil {
 					fmt.Println("PriviteChat.conn.write.error", err)
@@ -144,7 +145,7 @@ func (client *Client) UpdateName() bool {
 	fmt.Println("请输入用户名：")
 	fmt.Scanln(&client.UserName)
 
-	sendMsg := "rename|" + client.UserName + "\n"
+	sendMsg := "RENAME|" + client.UserName + "\n"
 	_, err := client.Conn.Write([]byte(sendMsg))
 	if err != nil {
 		fmt.Println("con.Write error: ", err)
@@ -155,7 +156,7 @@ func (client *Client) UpdateName() bool {
 
 // ShowOnlineUsers 获取在线用户列表
 func (client *Client) ShowOnlineUsers() {
-	sendMsg := "who\n"
+	sendMsg := "WHO\n"
 	_, err := client.Conn.Write([]byte(sendMsg))
 	if err != nil {
 		fmt.Printf("ShowOnlineUsers conn.write error: %v", err)
