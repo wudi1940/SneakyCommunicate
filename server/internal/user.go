@@ -21,6 +21,7 @@ func NewUser(conn net.Conn, server *Server) *User {
 	userAddr := conn.RemoteAddr().String()
 
 	user := &User{
+		Name:    userAddr,
 		Addr:    userAddr,
 		MsgChan: make(chan string),
 		conn:    conn,
