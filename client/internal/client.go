@@ -3,9 +3,9 @@ package client
 import (
 	"client/conf"
 	"fmt"
-	"io"
 	"net"
-	"os"
+
+	"github.com/gen2brain/beeep"
 )
 
 type Client struct {
@@ -168,10 +168,21 @@ func (client *Client) ShowOnlineUsers() {
 func (client *Client) ListenMsg() {
 	// 一旦client.conn有数据，就直接copy到stout标准输出
 	// 永久阻塞，等同于下面for循环
-	io.Copy(os.Stdout, client.Conn)
-	// for {
-	// 	buf := make([]byte, 1024)
-	// 	client.conn.Read(buf)
-	// 	fmt.Print(buf)
-	// }
+	//io.Copy(os.Stdout, client.Conn)
+	for {
+		buf := make([]byte, 1024)
+		n, err := client.Conn.Read(buf)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		msg := string(buf[:n])
+
+		err = beeep.Notify("你有新的消息", msg, "assets/information.png")
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		fmt.Print(msg)
+	}
 }
