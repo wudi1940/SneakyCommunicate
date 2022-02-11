@@ -1,6 +1,7 @@
 package server
 
 import (
+	"cmd/serverCmd.go/conf"
 	"net"
 	"strings"
 )
@@ -20,6 +21,7 @@ func NewUser(conn net.Conn, server *Server) *User {
 	userAddr := conn.RemoteAddr().String()
 
 	user := &User{
+		Name:    userAddr,
 		Addr:    userAddr,
 		MsgChan: make(chan string),
 		conn:    conn,
@@ -58,11 +60,11 @@ func (user *User) UnRegister() {
 // MsgHandle 处理用户消息
 func (user *User) MsgHandle(msg string) {
 	// 查询在线用户，并返回给当前用户
-	if msg == "who" {
+	if msg == conf.OnlineUserPrefix {
 		user.GetOnlineUsers()
-	} else if len(msg) > 7 && msg[:7] == "rename|" {
+	} else if len(msg) > 7 && msg[:7] == conf.RenamePrefix {
 		user.Rename(msg)
-	} else if len(msg) > 3 && msg[:3] == "to|" {
+	} else if len(msg) > 3 && msg[:3] == conf.PrivateChatPrefix {
 		user.PrivateChat(msg)
 	} else {
 		user.Server.Broadcast(user, msg)
@@ -94,7 +96,7 @@ func (user *User) PrivateChat(msg string) {
 func (user *User) GetOnlineUsers() {
 	user.Server.mapLock.Lock()
 	for _, client := range user.Server.OnlineMap {
-		client.MsgChan <- "[" + client.Addr + "] " + client.Name + ":online...\n"
+		user.MsgChan <- "[" + client.Addr + "] " + client.Name + ":online..."
 	}
 	user.Server.mapLock.Unlock()
 }
